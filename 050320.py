@@ -22,11 +22,14 @@ for cik in reqfuncs.ciks:
         for qtr in qutr:
             list10ks = reqfuncs.downloadmasteridx(year,qtr, cik)
             for k10 in list10ks:
+                print(k10[0])
                 sheet1.write(cnt,0, cik)
                 sheet1.write(cnt,1,str(year)+qtr)
                 sheet1.write(cnt,2,k10[1])
                 sheet1.write(cnt,3,k10[0])
+                reqfuncs.sectioninfo(k10[0])
                 cnt = cnt+1
+
         year = year+1
 
 wb.save('white1.xls')

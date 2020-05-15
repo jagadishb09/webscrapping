@@ -1,5 +1,7 @@
 import requests
 import re
+import pandas as pd
+import sys
 
 class Access10K:
     def __init__(self):
@@ -8,6 +10,50 @@ class Access10K:
     def getnextcik(self):
         self.index = self.index+1
         return self.ciks[self.index-1]
+
+    def removedups(self, doc, testdf):
+        try:
+            result = doc.index('<TABLE')
+            result = result+5
+            stack=[]
+            stack.append(['<TABLE', result])
+            print(stack)
+            while True:
+                try:
+                    print('try1'+str(result))
+                    result1 = doc.index('</TABLE', result)
+                    result1 = result1+5
+                    print('try2'+str(result1))
+                    #sys.exit()
+                    try:
+                        resulte = doc.index('<TABLE',result)
+                        result = resulte+5
+                        print('try3'+str(result))
+                        if(result1<result):
+                            print('try6' + str(result1))
+                            for index, row in testdf.head().iterrows():
+                                if row['start'] > stack[len(stack)-1][1] and row['start'] < result1:
+                                    print("hello word")
+                                    testdf=testdf.drop(index)
+                            stack.pop()
+                            result = result1
+                            print('try4'+str(result))
+                        else:
+                            stack.append(['<TABLE', result])
+                    except:
+                        for index,row in testdf.head().iterrows()():
+                            if row['start']>stack[len(stack)-1][1] and row['start']<result1:
+                                print("hello word")
+                                testdf=testdf.drop(index)
+                        result = result1
+                        stack.pop()
+                except:
+                    print('try5'+str(result))
+                    return testdf
+
+
+        except:
+            return testdf
 
     def downloadmasteridx(self, year, qtr, cik):
         base_url = r"https://www.sec.gov/Archives/edgar/full-index"
@@ -47,7 +93,6 @@ class Access10K:
             return list10k
 
     def sectioninfo(self, link):
-        print(link)
         r = requests.get(link)
         raw_10k = r.text
         doc_start_pattern = re.compile(r'<DOCUMENT>')
@@ -66,9 +111,24 @@ class Access10K:
         regex = re.compile(r'(>Item(\s|&#160;|&nbsp;)(1A)\.{0,1})|(ITEM\s(1A))')
         matches = regex.finditer(document['10-K'])
 
+        test_df = pd.DataFrame([(x.group(), x.start(), x.end()) for x in matches])
+        test_df.columns = ['item', 'start', 'end']
+        test_df['item'] = test_df.item.str.lower()
+        test_df.replace('&#160;', ' ', regex=True, inplace=True)
+        test_df.replace('&nbsp;', ' ', regex=True, inplace=True)
+        test_df.replace(' ', '', regex=True, inplace=True)
+        test_df.replace('\.', '', regex=True, inplace=True)
+        test_df.replace('>', '', regex=True, inplace=True)
+        print(self.removedups(document['10-K'],test_df))
+        sys.exit()
+
+        #implement stack to delete duplicate matches
+
+        #
+
         # Write a for loop to print the matches
-        for match in matches:
-            print(match)
+        #for match in matches:
+            #print(match)
         return 'hello world'
 
     def get10klinksdates(self, cik):
