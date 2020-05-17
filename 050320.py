@@ -15,6 +15,7 @@ from xlwt import Workbook
 wb = Workbook()
 cnt=1
 #for qtr in qutr:
+
 for cik in reqfuncs.ciks:
 
     sheet1 = wb.add_sheet(str(cik))
