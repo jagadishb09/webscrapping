@@ -2,6 +2,7 @@ import requests
 import re
 import pandas as pd
 import sys
+from bs4 import BeautifulSoup
 
 class Access10K:
     def __init__(self):
@@ -10,6 +11,13 @@ class Access10K:
     def getnextcik(self):
         self.index = self.index+1
         return self.ciks[self.index-1]
+
+    def search_for_bolded_tags(self, tag):
+        criteria1 = tag.anme == 'b'
+        criteria2 = tag.parent.name != 'td'
+
+        if criteria1:
+            return tag.get_text(strip = True).replace('\n',' ')
 
     def sectioninfo(self, link):
         r = requests.get(link)
@@ -30,7 +38,7 @@ class Access10K:
         with open('10k.txt', 'wt', encoding="ISO-8859-1") as file:
             file.write(document['10-K'])
 
-        regex = re.compile(r'(>Item(\s|&#160;|&nbsp;)(1A|1B|7A|7|8)\.{0,1})|(ITEM\s(1A|1B|7A|7|8))')
+        regex = re.compile(r'(>Item(\s|&#160;|&nbsp;)(5|6|7A|7)\.{0,1})|(ITEM\s(5|6|7A|7))')
         matches = regex.finditer(document['10-K'])
 
         test_df = pd.DataFrame([(x.group(), x.start(), x.end()) for x in matches])
@@ -41,8 +49,52 @@ class Access10K:
         test_df.replace(' ', '', regex=True, inplace=True)
         test_df.replace('\.', '', regex=True, inplace=True)
         test_df.replace('>', '', regex=True, inplace=True)
-        print(self.removedups(document['10-K'],test_df))
-        return 'hello world'
+        test_df = self.removedups(document['10-K'],test_df)
+        #test_df=test_df.reset_index()
+        test_df = test_df.reset_index(drop = True)
+        print(test_df)
+        #test_df.set_index('item', inplace=True)
+        #test_df.set_index('item', inplace=True)
+        #print(str(document['10-K']))
+        #doc10k= str(document['10-K'])
+        #print(doc10k)
+        #print (doc10k[410500:410600])
+
+        #print(item_1a_raw)
+        #item_1a_raw = document['10-K'][test_df['start'].loc[0]:test_df['start'].loc[1]]
+
+        numsubsecs=[]
+        numwords = []
+        for i in range(len(test_df)-1):
+            item_1a_raw = document['10-K'][test_df['start'].loc[i]:test_df['start'].loc[i+1]]
+            #print(item_1a_raw)
+            item_1a_content = BeautifulSoup(item_1a_raw, 'lxml')
+            bTags = []
+
+            for i in item_1a_content.findAll('b'):
+                tagtd = True
+                for j in i.parents:
+                    if j.name == 'td':
+                        tagtd = False
+
+                if tagtd:
+                    bTags.append(i.text)
+
+                #if(i.parent.name == 'p' and i.parents.name != 'td'):
+                 #   bTags.append(i.text)
+            numsubsecs.append(len(bTags))
+        numsubsecs.append(0)
+        test_df['numsubsecs'] = numsubsecs
+        print(test_df)
+            #print(item_1a_content)
+            #print('jdhgfjsdfjhdsddddddddddddddddddddddddddddddd')
+            #data = [b.string for b in item_1a_content.findAll('b')]
+            #print(data)
+            #bold_texts = item_1a_content.find_all(self.search_for_bolded_tags)
+            #print(bold_texts)
+            #print(item_1a_content)
+            #print(item_1a_content.get_text("\n\n"))
+        sys.exit()
 
     def removedups(self, doc, testdf):
         doc=doc.lower()
