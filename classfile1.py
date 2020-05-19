@@ -30,6 +30,7 @@ class Access10K:
         return is_b or is_strong or is_bold_font
 
     def sectioninfo(self, link):
+        #print('sectioninfo')
         r = requests.get(link)
         raw_10k = r.text
         doc_start_pattern = re.compile(r'<DOCUMENT>')
@@ -56,7 +57,7 @@ class Access10K:
 
 
         bold=[bold for bold in soup.find_all(self.bold_only)]
-        #print(bold)
+        print(bold)
         regex = re.compile(
             r'(Item(\s|&#160;|&nbsp;)([+-]?\d+(?:\.\d+)?)\.{1})|(ITEM\s([+-]?\d+(?:\.\d+)?))')
 
@@ -72,18 +73,18 @@ class Access10K:
                 #print(document.index(str(x)))
                 indices.append([x,document.index(str(x))])
                 #print('breakkkkkkkkkkkkkkkkkkkkkkkkkk')
-        print(indices)
+        #print(indices)
         sectioninfo=[]
-        numsubsecs = []
-        numwords = []
+        #numsubsecs = []
+        #numwords = []
         for index in range(len(indices) - 1):
             item_1a_raw = document[indices[index][1]:indices[index+1][1]]
             # print(item_1a_raw)
             item_1a_content = BeautifulSoup(item_1a_raw, 'lxml')
-            numwords.append(len(item_1a_content.get_text("\n\n")))
+            numwords = len(item_1a_content.get_text("\n\n"))
             bTags = []
 
-            for i in item_1a_content.findAll('b'):
+            for i in item_1a_content.findAll(self.bold_only):
                 tagtd = True
                 for j in i.parents:
                     if j.name == 'td':
@@ -94,10 +95,10 @@ class Access10K:
 
                 # if(i.parent.name == 'p' and i.parents.name != 'td'):
                 #   bTags.append(i.text)
-            numsubsecs.append(len(bTags))
+            numsubsecs = len(bTags)
             sectioninfo.append([numwords,numsubsecs])
-        numsubsecs.append(0)
-        numwords.append(0)
+        #numsubsecs.append(0)
+        #numwords.append(0)
         sectioninfo.append([0,0])
         #sectioninfor.append([numsubsecs,numwords])
         return sectioninfo
@@ -188,7 +189,7 @@ class Access10K:
         sys.exit()
         '''
     def removedups(self, doc, testdf):
-        print('dfsjdhfjhsdgfksdgfdksgf')
+        #print('dfsjdhfjhsdgfksdgfdksgf')
         df=[]
         doc=doc.lower()
         print(doc)
@@ -234,6 +235,7 @@ class Access10K:
             return df
 
     def downloadmasteridx(self, year, qtr, cik):
+        #print('downloadmstridx' + str(cik))
         base_url = r"https://www.sec.gov/Archives/edgar/full-index"
         url = '{}/{}'.format(base_url,year)
         url = '{}/{}'.format(url,qtr)

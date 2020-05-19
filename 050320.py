@@ -9,7 +9,7 @@ import codecs
 import sys
 from classfile1 import Access10K
 reqfuncs = Access10K()
-year = 2015
+year = 2011
 qutr = ["QTR1", "QTR2", "QTR3", "QTR4"]
 import xlwt
 from xlwt import Workbook
@@ -18,26 +18,29 @@ cnt=1
 #for qtr in qutr:
 
 for cik in reqfuncs.ciks:
-
-    sheet1 = wb.add_sheet(str(cik))
+    year=2011
+    print('cik ='+str(cik))
+    #sheet1 = wb.add_sheet(str(cik))
     while year<2020:
+        print()
+        print()
         for qtr in qutr:
             list10ks = reqfuncs.downloadmasteridx(year,qtr, cik)
             for k10 in list10ks:
                 print(k10[0])
-                sheet1.write(cnt,0, cik)
-                sheet1.write(cnt,1,str(year)+qtr)
-                sheet1.write(cnt,2,k10[1])
-                sheet1.write(cnt,3,k10[0])
+                #sheet1.write(cnt,0, cik)
+                #sheet1.write(cnt,1,str(year)+qtr)
+                #sheet1.write(cnt,2,k10[1])
+                #sheet1.write(cnt,3,k10[0])
                 sectinfo = reqfuncs.sectioninfo(k10[0])
                 print(len(sectinfo))
                 print(sectinfo)
-                sys.exit()
+                #sys.exit()
                 cnt = cnt+1
 
         year = year+1
 
-wb.save('white1.xls')
+#wb.save('white1.xls')
     #for each 10k
     #print(reqfuncs)
     #for cik in reqfuncs.ciks:
