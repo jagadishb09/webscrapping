@@ -13,7 +13,7 @@ class Access10K:
         return self.ciks[self.index-1]
 
     def search_for_bolded_tags(self, tag):
-        criteria1 = tag.anme == 'b'
+        criteria1 = tag.name == 'b'
         criteria2 = tag.parent.name != 'td'
 
         if criteria1:
@@ -38,7 +38,11 @@ class Access10K:
         with open('10k.txt', 'wt', encoding="ISO-8859-1") as file:
             file.write(document['10-K'])
 
-        regex = re.compile(r'(>Item(\s|&#160;|&nbsp;)(5|6|7A|7)\.{0,1})|(ITEM\s(5|6|7A|7))')
+        #regex = re.compile(r'(>Item(\s|&#160;|&nbsp;)(1|1A|1B|2|3|4|5|6|7|7A|8|9|9A|9B|10|11|12|13|14|15)\.{0,1})|(ITEM\s(1|1A|1B|2|3|4|5|6|7|7A|8|9|9A|9B|10|11|12|13|14|15))')
+        regex = re.compile(
+            r'(>Item(\s|&#160;|&nbsp;)(1A|1B|7A|7|8)\.{0,1})|(ITEM\s(1A|1B|7A|7|8))')
+        #regex = re.compile(r'(>Item(\s|&#160;|&nbsp;)(5|6|7A|7)\.{0,1})|(ITEM\s(5|6|7A|7))')
+        #regex = re.compile(r'(>Item(\s|&#160;|&nbsp;)([+-]?\d+(?:\.\d+)?)\.{0,1})|(ITEM\s)([+-]?\d+(?:\.\d+)?)')
         matches = regex.finditer(document['10-K'])
 
         test_df = pd.DataFrame([(x.group(), x.start(), x.end()) for x in matches])
@@ -53,6 +57,7 @@ class Access10K:
         #test_df=test_df.reset_index()
         test_df = test_df.reset_index(drop = True)
         print(test_df)
+        sys.exit()
         #test_df.set_index('item', inplace=True)
         #test_df.set_index('item', inplace=True)
         #print(str(document['10-K']))
@@ -69,6 +74,7 @@ class Access10K:
             item_1a_raw = document['10-K'][test_df['start'].loc[i]:test_df['start'].loc[i+1]]
             #print(item_1a_raw)
             item_1a_content = BeautifulSoup(item_1a_raw, 'lxml')
+            numwords.append(len(item_1a_content.get_text("\n\n")))
             bTags = []
 
             for i in item_1a_content.findAll('b'):
@@ -84,7 +90,9 @@ class Access10K:
                  #   bTags.append(i.text)
             numsubsecs.append(len(bTags))
         numsubsecs.append(0)
+        numwords.append(0)
         test_df['numsubsecs'] = numsubsecs
+        test_df['numwords'] = numwords
         print(test_df)
             #print(item_1a_content)
             #print('jdhgfjsdfjhdsddddddddddddddddddddddddddddddd')
