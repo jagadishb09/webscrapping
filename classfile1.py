@@ -6,7 +6,10 @@ from bs4 import BeautifulSoup
 
 class Access10K:
     def __init__(self):
-        self.ciks=[320193]
+        self.ciks=[51143]
+        #1018724
+            #[51143]
+        #320193
         self.index=0
     def getnextcik(self):
         self.index = self.index+1
@@ -18,6 +21,13 @@ class Access10K:
 
         if criteria1:
             return tag.get_text(strip = True).replace('\n',' ')
+
+    def bold_only(self,tag):
+        is_b = tag.name == 'b'
+        is_strong = tag.name == 'strong'
+        is_bold_font = tag.name == 'font' and 'style' in tag.attrs and 'bold' in tag['style']
+
+        return is_b or is_strong or is_bold_font
 
     def sectioninfo(self, link):
         r = requests.get(link)
@@ -35,8 +45,78 @@ class Access10K:
             if doc_type == '10-K':
                 document[doc_type] = raw_10k[doc_start:doc_end]
 
-        with open('10k.txt', 'wt', encoding="ISO-8859-1") as file:
-            file.write(document['10-K'])
+
+
+        html = document['10-K']
+        soup = BeautifulSoup(html, "html.parser")
+        document = str(soup)
+        with open('10k.txt', 'wt') as file:
+            file.write(document)
+
+
+
+        bold=[bold for bold in soup.find_all(self.bold_only)]
+        #print(bold)
+        regex = re.compile(
+            r'(Item(\s|&#160;|&nbsp;)([+-]?\d+(?:\.\d+)?)\.{1})|(ITEM\s([+-]?\d+(?:\.\d+)?))')
+
+#<b>Reference<br/>
+            #r'(>Item(\s|&#160;|&nbsp;)(1|1A|1B|2|3|4|5|6|7|7A|8|9|9A|9B|10|11|12|13|14|15)\.{0,1})|(ITEM\s(1|1A|1B|2|3|4|5|6|7|7A|8|9|9A|9B|10|11|12|13|14|15))')
+        indices=[]
+        for x in bold:
+            matches=[]
+            matches=regex.findall(str(x))
+            if(len(matches) > 0):
+                #print(x)
+                #regex = re.compile(str(x))
+                #print(document.index(str(x)))
+                indices.append([x,document.index(str(x))])
+                #print('breakkkkkkkkkkkkkkkkkkkkkkkkkk')
+        print(indices)
+        sectioninfo=[]
+        numsubsecs = []
+        numwords = []
+        for index in range(len(indices) - 1):
+            item_1a_raw = document[indices[index][1]:indices[index+1][1]]
+            # print(item_1a_raw)
+            item_1a_content = BeautifulSoup(item_1a_raw, 'lxml')
+            numwords.append(len(item_1a_content.get_text("\n\n")))
+            bTags = []
+
+            for i in item_1a_content.findAll('b'):
+                tagtd = True
+                for j in i.parents:
+                    if j.name == 'td':
+                        tagtd = False
+
+                if tagtd:
+                    bTags.append(i.text)
+
+                # if(i.parent.name == 'p' and i.parents.name != 'td'):
+                #   bTags.append(i.text)
+            numsubsecs.append(len(bTags))
+            sectioninfo.append([numwords,numsubsecs])
+        numsubsecs.append(0)
+        numwords.append(0)
+        sectioninfo.append([0,0])
+        #sectioninfor.append([numsubsecs,numwords])
+        return sectioninfo
+        #print(numsubsecs)
+        #print(numwords)
+        #test_df['numwords'] = numwords
+        #print(test_df)
+        # print(item_1a_content)
+        # print('jdhgfjsdfjhdsddddddddddddddddddddddddddddddd')
+        # data = [b.string for b in item_1a_content.findAll('b')]
+        # print(data)
+        # bold_texts = item_1a_content.find_all(self.search_for_bolded_tags)
+        # print(bold_texts)
+        # print(item_1a_content)
+        # print(item_1a_content.get_text("\n\n"))
+        #sys.exit()
+
+        #sys.exit()
+        '''
 
         #regex = re.compile(r'(>Item(\s|&#160;|&nbsp;)(1|1A|1B|2|3|4|5|6|7|7A|8|9|9A|9B|10|11|12|13|14|15)\.{0,1})|(ITEM\s(1|1A|1B|2|3|4|5|6|7|7A|8|9|9A|9B|10|11|12|13|14|15))')
         regex = re.compile(
@@ -106,7 +186,7 @@ class Access10K:
             #print(item_1a_content)
             #print(item_1a_content.get_text("\n\n"))
         sys.exit()
-
+        '''
     def removedups(self, doc, testdf):
         print('dfsjdhfjhsdgfksdgfdksgf')
         df=[]

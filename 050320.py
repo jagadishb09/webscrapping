@@ -6,7 +6,8 @@ import re
 import requests
 import urllib.request
 import codecs
-from classfile import Access10K
+import sys
+from classfile1 import Access10K
 reqfuncs = Access10K()
 year = 2015
 qutr = ["QTR1", "QTR2", "QTR3", "QTR4"]
@@ -28,7 +29,10 @@ for cik in reqfuncs.ciks:
                 sheet1.write(cnt,1,str(year)+qtr)
                 sheet1.write(cnt,2,k10[1])
                 sheet1.write(cnt,3,k10[0])
-                reqfuncs.sectioninfo(k10[0])
+                sectinfo = reqfuncs.sectioninfo(k10[0])
+                print(len(sectinfo))
+                print(sectinfo)
+                sys.exit()
                 cnt = cnt+1
 
         year = year+1
