@@ -17,6 +17,15 @@ class Access10K:
 
         return is_b or is_strong or is_bold_font
 
+    #search for the given word in the link
+    def searchword(self, link, searchword):
+        r = requests.get(link)
+        raw_10k = r.text
+        bsoup = BeautifulSoup(raw_10k, "html.parser")
+        words = bsoup.get_text().split()
+        if searchword in words:
+            return True
+
     #function to get section info from the text which contains html
     #gets number of sections, number of words in each section and number of subsections in each section
     def sectioninfo(self, link):
@@ -37,6 +46,7 @@ class Access10K:
 
         html = document['10-K']
         soup = BeautifulSoup(html, "html.parser")
+        numwordsindoc = len(soup.get_text().split())
         document = str(soup)
         #with open('10k.txt', 'wt') as file:
             #file.write(document)
@@ -57,7 +67,7 @@ class Access10K:
         for index in range(len(indices) - 1):
             item_1a_raw = document[indices[index][1]:indices[index+1][1]]
             item_1a_content = BeautifulSoup(item_1a_raw, 'lxml')
-            numwords = len(item_1a_content.get_text("\n\n"))
+            numwords = len(item_1a_content.get_text("\n\n").split())
 
             bTags = []
             for i in item_1a_content.findAll(self.bold_only):
@@ -89,7 +99,7 @@ class Access10K:
         numsubsecs = len(bTags)
         sectioninfo.append([numwords,numsubsecs,indices[len(indices)-1][2]])
 
-        return sectioninfo
+        return numwordsindoc, sectioninfo
 
     #gets master index file for a given year,quarter and cik
     def downloadmasteridx(self, year, qtr, cik):

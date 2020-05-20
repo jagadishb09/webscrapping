@@ -27,7 +27,8 @@ for cik in reqfuncs.ciks:
             for k10 in list10ks:
                 print(k10[0])
 
-                sectinfo = reqfuncs.sectioninfo(k10[0])
+                numworsdsindoc, sectinfo = reqfuncs.sectioninfo(k10[0])
+                numsecs = len(sectinfo)
                 for secinfo in sectinfo:
 
                     sheet1.write(cnt,0, cik)
@@ -37,6 +38,8 @@ for cik in reqfuncs.ciks:
                     sheet1.write(cnt,4, secinfo[0])
                     sheet1.write(cnt, 5, secinfo[1])
                     sheet1.write(cnt, 6, secinfo[2])
+                    sheet1.write(cnt, 7,numworsdsindoc)
+                    sheet1.write(cnt, 8, numsecs)
                     cnt = cnt + 1
 
         year = year+1
