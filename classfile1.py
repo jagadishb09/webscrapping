@@ -84,7 +84,7 @@ class Access10K:
 
         item_1a_raw = document[indices[len(indices)-1][1]:]
         item_1a_content = BeautifulSoup(item_1a_raw, 'lxml')
-        numwords = len(item_1a_content.get_text("\n\n"))
+        numwords = len(item_1a_content.get_text("\n\n").split())
 
         bTags = []
         for i in item_1a_content.findAll(self.bold_only):
