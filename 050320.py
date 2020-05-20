@@ -40,6 +40,8 @@ for cik in reqfuncs.ciks:
                     sheet1.write(cnt, 6, secinfo[2])
                     sheet1.write(cnt, 7,numworsdsindoc)
                     sheet1.write(cnt, 8, numsecs)
+                    sheet1.write(cnt, 9, secinfo[3])
+                    sheet1.write(cnt, 10, secinfo[4])
                     cnt = cnt + 1
 
         year = year+1

@@ -3,6 +3,7 @@ import re
 import pandas as pd
 import sys
 from bs4 import BeautifulSoup
+import textstat
 
 class Access10K:
     def __init__(self):
@@ -46,7 +47,8 @@ class Access10K:
 
         html = document['10-K']
         soup = BeautifulSoup(html, "html.parser")
-        numwordsindoc = len(soup.get_text().split())
+        souptext = soup.get_text()
+        numwordsindoc = len(souptext.split())
         document = str(soup)
         #with open('10k.txt', 'wt') as file:
             #file.write(document)
@@ -67,7 +69,10 @@ class Access10K:
         for index in range(len(indices) - 1):
             item_1a_raw = document[indices[index][1]:indices[index+1][1]]
             item_1a_content = BeautifulSoup(item_1a_raw, 'lxml')
-            numwords = len(item_1a_content.get_text("\n\n").split())
+            sectiontext=item_1a_content.get_text("\n\n")
+            numwords = len(sectiontext.split())
+            smogindex = textstat.smog_index(sectiontext)
+            fogindex = textstat.gunning_fog(sectiontext)
 
             bTags = []
             for i in item_1a_content.findAll(self.bold_only):
@@ -80,11 +85,14 @@ class Access10K:
                     bTags.append(i.text)
 
             numsubsecs = len(bTags)
-            sectioninfo.append([numwords,numsubsecs, indices[index][2]])
+            sectioninfo.append([numwords,numsubsecs, indices[index][2], smogindex, fogindex])
 
         item_1a_raw = document[indices[len(indices)-1][1]:]
         item_1a_content = BeautifulSoup(item_1a_raw, 'lxml')
-        numwords = len(item_1a_content.get_text("\n\n").split())
+        sectiontext = item_1a_content.get_text("\n\n")
+        numwords = len(sectiontext.split())
+        smogindex = textstat.smog_index(sectiontext)
+        fogindex = textstat.gunning_fog(sectiontext)
 
         bTags = []
         for i in item_1a_content.findAll(self.bold_only):
@@ -97,7 +105,7 @@ class Access10K:
                 bTags.append(i.text)
 
         numsubsecs = len(bTags)
-        sectioninfo.append([numwords,numsubsecs,indices[len(indices)-1][2]])
+        sectioninfo.append([numwords,numsubsecs,indices[len(indices)-1][2], smogindex, fogindex])
 
         return numwordsindoc, sectioninfo
 
