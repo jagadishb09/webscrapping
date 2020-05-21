@@ -14,12 +14,17 @@ import xlwt
 from xlwt import Workbook
 wb = Workbook()
 cnt=1
+sheet1 = wb.add_sheet('edgar data')
 
+columnnames = ['Cik', 'Year and Quarter', 'Date Filed', 'Link', 'Number of Words in Each Section', 'Number of sub-sections in the Section', 'Section Name', 'Number of Words in the Whole Document', 'Number of Sections in the Document', 'Smog Index' , 'Fog Index']
+
+colcount = 0
+for colname in columnnames:
+    sheet1.write(0,colcount, colname)
+    colcount = colcount+1
 
 for cik in reqfuncs.ciks:
     year=2011
-
-    sheet1 = wb.add_sheet(str(cik))
     while year<2020:
 
         for qtr in qutr:
@@ -47,9 +52,3 @@ for cik in reqfuncs.ciks:
         year = year+1
 
 wb.save('white1.xls')
-
-
-
-
-
-

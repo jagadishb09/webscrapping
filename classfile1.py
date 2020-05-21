@@ -15,8 +15,9 @@ class Access10K:
         is_b = tag.name == 'b'
         is_strong = tag.name == 'strong'
         is_bold_font = tag.name == 'font' and 'style' in tag.attrs and 'bold' in tag['style']
+        is_bold_span = tag.name == 'span' and 'style' in tag.attrs and 'bold' in tag['style']
 
-        return is_b or is_strong or is_bold_font
+        return is_b or is_strong or is_bold_font or is_bold_span
 
     #search for the given word in the link
     def searchword(self, link, searchword):
@@ -51,9 +52,10 @@ class Access10K:
         numwordsindoc = len(souptext.split())
         document = str(soup)
         #with open('10k.txt', 'wt') as file:
-            #file.write(document)
+         #   file.write(str(soup))
 
         bold=[bold for bold in soup.find_all(self.bold_only)]
+        #print(bold)
 
         regex = re.compile(
             r'(Item(\s|&#160;|&nbsp;)([+-]?\d+(?:\.\d+)?)([a-z]|[A-Z])*\.{1})|(ITEM\s([+-]?\d+(?:\.\d+)?)\.{1}([a-z]|[A-Z])*\.{1})')
@@ -64,7 +66,7 @@ class Access10K:
             matches=regex.findall(x.get_text())
             if(len(matches) > 0):
                 indices.append([x,document.index(str(x)), x.get_text()])
-
+        #print(indices)
         sectioninfo=[]
         for index in range(len(indices) - 1):
             item_1a_raw = document[indices[index][1]:indices[index+1][1]]
